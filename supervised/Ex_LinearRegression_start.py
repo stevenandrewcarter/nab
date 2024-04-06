@@ -58,8 +58,8 @@ def main():
     
     # DATA INPUT
     ############
-    file_path = "./house_prices/train.csv" #TASK: Modify to path of file
-    input_data = file_path# TASK: Read in the input csv file using pandas
+    file_path = "./data/train.csv"
+    input_data = pd.read_csv(file_path, index_col='Id')
     display_df_info("Raw Input", input_data)
 
     # Seperate out the outcome variable from the loaded dataframe
@@ -71,7 +71,7 @@ def main():
     #####################################
 
     # Subsetting the columns: define features to keep
-    feature_names = []# TASK: Define the names of the columns to keep
+    feature_names = ['LotArea', 'YearBuilt', '1stFlrSF', '2ndFlrSF', 'FullBath', 'BedroomAbvGr', 'TotRmsAbvGrd', 'HouseStyle']
     features = input_data[feature_names]
     display_df_info('Features before Transform', features, v=True)
 
