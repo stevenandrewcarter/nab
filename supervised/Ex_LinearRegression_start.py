@@ -17,6 +17,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 
 import joblib
+import os
 
 # Information on Data
 # https://www.kaggle.com/c/home-data-for-ml-course/data
@@ -47,18 +48,14 @@ class GetAge(BaseEstimator, TransformerMixin):
     
     def transform(self,X):
         current_year = int(d.datetime.now().year)
-
-        """TASK: Replace the 'YearBuilt' column values with the calculated age (subtract the 
-        current year from the original values).
-        """
-        
+        X['YearBuilt'] = current_year - X['YearBuilt']
         return X
 
 def main():
     
     # DATA INPUT
     ############
-    file_path = "./data/train.csv"
+    file_path = f"{os.path.dirname(os.path.realpath(__file__))}/data/train.csv"
     input_data = pd.read_csv(file_path, index_col='Id')
     display_df_info("Raw Input", input_data)
 
@@ -78,8 +75,8 @@ def main():
     # Create the pipeline ...
     # 1. Pre-processing
     # Define variables made up of lists. Each list is a set of columns that will go through the same data transformations.
-    numerical_features = [] # TASK: Define numerical column names
-    categorical_features = [] # TASK: Define categorical column names
+    numerical_features = ['LotArea', 'YearBuilt', '1stFlrSF', '2ndFlrSF', 'FullBath', 'BedroomAbvGr', 'TotRmsAbvGrd']
+    categorical_features = ['HouseStyle']
     
     """TASK:
     Define the data processing steps (transformers) to be applied to the numerical features in the dataset.
@@ -87,14 +84,15 @@ def main():
     At a minimum, use 2 transformers: GetAge() and one other. Combine them using make_pipeline() or Pipeline()
     """
     preprocess = make_column_transformer(
-        ("""TASK: Define transformers""", numerical_features),
+        (GetAge(), ['YearBuilt']),
+        (StandardScaler(), numerical_features),
         (OneHotEncoder(), categorical_features)
     )
     
     # 2. Combine pre-processing with ML algorithm
     model = make_pipeline(
         preprocess,
-        # TASK : replace with ML algorithm from scikit
+        LinearRegression()
     )
 
     # TRAINING
@@ -104,8 +102,7 @@ def main():
     Split the data in test and train sets by completing the train_test_split function below. Define a random_state value so that 
     the experiment is repeatable.
     """
-    x_train, x_test, y_train, y_test = train_test_split() # TASK: Complete the code
-
+    x_train, x_test, y_train, y_test = train_test_split(features, output_var, test_size=0.3, random_state=42)
     # Train the pipeline
     model.fit(x_train, y_train)
 
@@ -122,6 +119,8 @@ def main():
         
     Name your variables rmse and r2 respectively.
     """
+    rmse = mean_squared_error(y_test, pred_test, squared=False)
+    r2 = r2_score(y_test, pred_test)
     print("Results on Test Data")
     print("####################")
     print("RMSE: {:.2f}".format(rmse))
@@ -134,6 +133,7 @@ def main():
     
     Name your variable compare
     """
+    compare = pd.DataFrame({'y_test': y_test, 'pred_test': pred_test, 'diff': round(y_test - pred_test, 2)})
     display_df_info('Actual vs Predicted Comparison', compare)
 
     # Save the model 
