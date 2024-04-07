@@ -84,8 +84,7 @@ def main():
     At a minimum, use 2 transformers: GetAge() and one other. Combine them using make_pipeline() or Pipeline()
     """
     preprocess = make_column_transformer(
-        (GetAge(), ['YearBuilt']),
-        (StandardScaler(), numerical_features),
+        (make_pipeline(GetAge(), SimpleImputer(), StandardScaler()), numerical_features),
         (OneHotEncoder(), categorical_features)
     )
     
@@ -119,7 +118,7 @@ def main():
         
     Name your variables rmse and r2 respectively.
     """
-    rmse = mean_squared_error(y_test, pred_test, squared=False)
+    rmse = np.sqrt(mean_squared_error(y_test, pred_test))
     r2 = r2_score(y_test, pred_test)
     print("Results on Test Data")
     print("####################")
@@ -133,7 +132,7 @@ def main():
     
     Name your variable compare
     """
-    compare = pd.DataFrame({'y_test': y_test, 'pred_test': pred_test, 'diff': round(y_test - pred_test, 2)})
+    compare = pd.DataFrame({'Actual': y_test, 'Predicted': pred_test, 'Difference': round(y_test - pred_test, 2)})
     display_df_info('Actual vs Predicted Comparison', compare)
 
     # Save the model 
